@@ -58,7 +58,7 @@ jobs:
 
       - run: npm ci
 
-      - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0
+      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -69,5 +69,5 @@ jobs:
           releaseBody: Download the installer for your system below. On macOS, the first time, right-click the app → Open.
           releaseDraft: true
           prerelease: false
-          includeUpdaterJson: true
+          uploadUpdaterJson: true # renamed from includeUpdaterJson in tauri-action v1
           args: --config src-tauri/tauri.updater.conf.json ${{ matrix.args }}
