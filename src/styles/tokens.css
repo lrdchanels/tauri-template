@@ -1,0 +1,73 @@
+/* Design tokens. Change the palette here: every component and chart reads these variables.
+   Themes: data-theme on <html> is 'system' (follows the OS), 'light' or 'dark'. */
+
+:root {
+  --font: "Geist Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --radius: 8px;
+
+  --sidebar: #13202f;
+  --sidebar-text: #b9c5d4;
+  --sidebar-active: #22344a;
+  --sidebar-accent: #8fb4f0;
+
+  color-scheme: light;
+  --bg: #f5f7fa;
+  --surface: #ffffff;
+  --surface-2: #eef2f6;
+  --border: #dde3eb;
+  --text: #14202e;
+  --text-2: #4b586a;
+  --text-3: #657184;
+  --grid: #e2e7ee;
+  --accent: #2563c9;
+  --accent-soft: #a9c3ec;
+  --neutral: #8a94a3;
+  --up: #18885a;
+  --down: #c4453b;
+  --warn: #9a6a12;
+  --warn-bg: #fbf3e2;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="system"] {
+    color-scheme: dark;
+    --sidebar: #0a111b;
+    --sidebar-active: #1a293b;
+    --bg: #0f1722;
+    --surface: #152131;
+    --surface-2: #1a2839;
+    --border: #26374c;
+    --text: #e5eaf1;
+    --text-2: #a8b4c3;
+    --text-3: #8693a5;
+    --grid: #223146;
+    --accent: #5b90e3;
+    --accent-soft: #35598f;
+    --neutral: #7f8b9c;
+    --up: #3db27b;
+    --down: #e4675d;
+    --warn: #e0b25a;
+    --warn-bg: #2a2414;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --sidebar: #0a111b;
+  --sidebar-active: #1a293b;
+  --bg: #0f1722;
+  --surface: #152131;
+  --surface-2: #1a2839;
+  --border: #26374c;
+  --text: #e5eaf1;
+  --text-2: #a8b4c3;
+  --text-3: #8693a5;
+  --grid: #223146;
+  --accent: #5b90e3;
+  --accent-soft: #35598f;
+  --neutral: #7f8b9c;
+  --up: #3db27b;
+  --down: #e4675d;
+  --warn: #e0b25a;
+  --warn-bg: #2a2414;
+}

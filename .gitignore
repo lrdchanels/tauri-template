@@ -1,0 +1,12 @@
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/schemas/
+playwright-report/
+test-results/
+*.log
+.DS_Store
+.claude/settings.local.json
+# updater signing keys: never commit them
+*.key
+*.key.pub
