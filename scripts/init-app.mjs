@@ -136,8 +136,11 @@ function plan(v) {
     t
       .replace(/^name = ".*"$/m, `name = ${tomlString(v.name)}`)
       .replace(/^version = ".*"$/m, 'version = "0.1.0"')
-      .replace(/^description = ".*"$/m, `description = ${tomlString(v.description || v.product)}`)
-      .replace(/^(edition = .*)$/m, v.author ? `authors = [${tomlString(v.author)}]\n$1` : '$1'),
+      // Replacer functions: a `$` in the description or author must not be read as a pattern.
+      .replace(/^description = ".*"$/m, () => `description = ${tomlString(v.description || v.product)}`)
+      .replace(/^(edition = .*)$/m, (line) =>
+        v.author ? `authors = [${tomlString(v.author)}]\n${line}` : line,
+      ),
   );
   if (existsSync(join(root, 'src-tauri/Cargo.lock'))) {
     edit('src-tauri/Cargo.lock', (t) =>
@@ -159,10 +162,11 @@ function plan(v) {
   edit('src/app.config.ts', (t) =>
     t
       .replace(/id: '.*',/, `id: '${v.name}',`)
-      .replace(/name: '.*',/, `name: ${JSON.stringify(v.product).replace(/^"|"$/g, "'")},`)
+      .replace(/name: '.*',/, () => `name: ${JSON.stringify(v.product)},`)
       .replace(/repo: '.*',/, `repo: '${v.repo}',`),
   );
-  edit('index.html', (t) => t.replace(/<title>.*<\/title>/, `<title>${v.product}</title>`));
+  const htmlText = v.product.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+  edit('index.html', (t) => t.replace(/<title>.*<\/title>/, () => `<title>${htmlText}</title>`));
   edit('README.md', () => readme(v));
 }
 
@@ -209,6 +213,8 @@ function signingKey(v) {
 
 function icons(source) {
   if (!existsSync(source)) fail(`Icon not found: ${source}`);
+  // The path goes into a shell command: refuse characters a shell would interpret.
+  if (/["`$%!\r\n]/.test(source)) fail(`Unsupported characters in the icon path: ${source}`);
   if (source.toLowerCase().endsWith('.svg')) {
     copyFileSync(source, join(root, 'src-tauri/icons/icon.svg'));
     copyFileSync(source, join(root, 'public/icon.svg'));
@@ -244,7 +250,8 @@ if (key) {
   console.log(`
 Updater signing key: ${key}  (keep it safe and out of git; losing it means users
 cannot auto-update to versions signed with a new key). For release builds on GitHub:
-  gh secret set TAURI_SIGNING_PRIVATE_KEY < "${key}"
-  gh secret set TAURI_SIGNING_PRIVATE_KEY_PASSWORD --body ""`);
+  gh secret set TAURI_SIGNING_PRIVATE_KEY --env release < "${key}"
+  gh secret set TAURI_SIGNING_PRIVATE_KEY_PASSWORD --env release --body ""
+Then protect the release environment and v* tags: see docs/release.md.`);
 }
 if (!v.repo) console.log('\nNo repo given: set the updater endpoint in src-tauri/tauri.conf.json later.');

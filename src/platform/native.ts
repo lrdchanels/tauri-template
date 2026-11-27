@@ -1,6 +1,7 @@
 // Tauri implementation of the platform. The only module that imports @tauri-apps/*.
 // Plugins are imported lazily so the browser build never loads them.
 
+import { unpackFiles } from '../lib/pack';
 import type { Platform } from './types';
 
 const core = () => import('@tauri-apps/api/core');
@@ -32,12 +33,8 @@ export const native: Platform = {
   },
 
   async pickFiles({ title, filters, multiple = false }) {
-    const files = await invoke<{ name: string; bytes: number[] }[]>('pick_files', {
-      title,
-      filters,
-      multiple,
-    });
-    return files.map((f) => ({ name: f.name, bytes: new Uint8Array(f.bytes) }));
+    // Raw bytes (tauri::ipc::Response) arrive as an ArrayBuffer.
+    return unpackFiles(await invoke<ArrayBuffer>('pick_files', { title, filters, multiple }));
   },
   openText(filter) {
     return invoke<string | null>('open_text', { filter });

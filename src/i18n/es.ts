@@ -51,6 +51,7 @@ export const es = {
     'La app ha encontrado un error inesperado. Puedes seguir usándola; si se repite, copia el detalle y avísanos.',
   'error.copy': 'Copiar detalle',
   'error.copied': 'Detalle copiado.',
+  'error.copyFailed': 'No se ha podido copiar el detalle.',
   'error.report': 'Informar del problema',
   'error.dismiss': 'Cerrar',
 

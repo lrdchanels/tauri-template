@@ -53,14 +53,14 @@ src/
     charts.ts        ECharts (tree-shaken, SVG, theme colours from CSS vars)
     toast.ts         status messages
     crash.ts         global error screen
-  lib/               pure helpers, no DOM: dates (integer day numbers), csv, errors
+  lib/               pure helpers, no DOM: dates (integer day numbers), csv, errors, pack (binary IPC)
   views/             one file per screen; registered in views/index.ts
   styles/            tokens.css (palette, light/dark), base.css (shell), components.css
 src-tauri/src/
   main.rs            builder: plugins + generate_handler! (every command listed here)
-  storage.rs         JSON documents in app_data_dir, whitelist ALLOWED, atomic writes
-  files.rs           dialogs opened in Rust: pick_files, open_text, save_as
-  http.rs            http_get_json with ALLOWED_HOSTS (HTTPS only)
+  storage.rs         JSON documents in app_data_dir, whitelist ALLOWED, atomic + serialised writes
+  files.rs           dialogs opened in Rust: pick_files (raw bytes), open_text, save_as; MAX_FILE_BYTES
+  http.rs            http_get_json with ALLOWED_HOSTS (HTTPS only, redirects too), MAX_RESPONSE_BYTES
   error.rs           AppError → { kind, message } for the frontend
 test/                vitest + happy-dom (lib, ui, i18n, store, storage-key sync)
 e2e/                 Playwright against the browser build
@@ -103,6 +103,8 @@ a unit test checks they match).
    and is covered by a `#[cfg(test)]` test for its pure logic.
 8. **Plugin APIs called from TS need a permission** in `src-tauri/capabilities/default.json`.
    Own commands do not.
+   Keep scopes narrow (e.g. `opener:allow-open-url` only lists the domains the app opens) and
+   never add a host to `ALLOWED_HOSTS` or a key to `ALLOWED` "just in case".
 9. Keep `npm run check` green. Don't disable lint rules or add `// @ts-ignore` to get there.
 10. Colours only from CSS variables in `styles/tokens.css`; charts read them via `colors()`.
 
@@ -112,6 +114,9 @@ Step-by-step guides in [docs/recipes.md](docs/recipes.md): add a view, a command
 a stored document, a setting, a plugin, a chart, a locale. Design decisions in
 [docs/decisions.md](docs/decisions.md); releases and signing in [docs/release.md](docs/release.md).
 Claude Code skills in `.claude/skills/` automate the common ones.
+Security model and how to report a vulnerability: [SECURITY.md](SECURITY.md). CI also runs
+`npm audit` and `cargo audit` (`.github/workflows/audit.yml`); workflow actions are pinned to
+commit SHAs (Dependabot bumps them).
 
 ## Verifying UI changes
 

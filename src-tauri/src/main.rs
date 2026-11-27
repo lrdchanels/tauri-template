@@ -38,6 +38,7 @@ fn main() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .manage(http::Http::default())
+        .manage(storage::WriteLock::default())
         // Every command the frontend can call. Add yours here and expose it in src/platform/.
         .invoke_handler(tauri::generate_handler![
             storage::storage_read,

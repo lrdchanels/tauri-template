@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { APP } from '../src/app.config';
 import { platform, STORE_KEYS } from '../src/platform';
 import { InvalidBackupError, NewerVersionError, store } from '../src/store';
@@ -11,6 +11,10 @@ beforeEach(async () => {
   store.reset();
 });
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe('mergeDefaults', () => {
   it('fills missing fields deeply; arrays and values from the saved data win', () => {
     const defaults = { a: 1, nested: { x: true, y: 'y' }, list: [1, 2] };
@@ -19,6 +23,15 @@ describe('mergeDefaults', () => {
       nested: { x: false, y: 'y' },
       list: [],
     });
+  });
+
+  it('ignores keys that would reach the prototype chain', () => {
+    const saved = JSON.parse('{"__proto__": {"polluted": true}, "nested": {"constructor": {"x": 1}}}');
+    const out = mergeDefaults({ nested: { a: 1 } }, saved) as Record<string, unknown>;
+    expect(Object.getPrototypeOf(out)).toBe(Object.prototype);
+    expect((out as { polluted?: unknown }).polluted).toBeUndefined();
+    expect(({} as { polluted?: unknown }).polluted).toBeUndefined();
+    expect(out.nested).toEqual({ a: 1 });
   });
 });
 
@@ -44,6 +57,17 @@ describe('Doc', () => {
       tags: ['migrated'],
     });
     expect(doc().hydrate({ version: 2, value: { name: 'n' } })).toEqual({ name: 'n', tags: ['migrated'] });
+  });
+
+  it('undoes a change when saving fails', async () => {
+    const d = doc();
+    vi.spyOn(platform, 'write').mockRejectedValueOnce(new Error('disk full'));
+    await expect(
+      d.update((v) => {
+        v.name = 'lost';
+      }),
+    ).rejects.toThrow('disk full');
+    expect(d.value.name).toBe('');
   });
 
   it('refuses data from a newer version', () => {
@@ -91,6 +115,21 @@ describe('backup', () => {
       store.restore(JSON.stringify({ app: APP.id, docs: { data: { version: 99, value: {} } } })),
     ).rejects.toThrow(NewerVersionError);
     expect(store.data.value.items[0]?.name).toBe('keep');
+  });
+
+  it('rejects documents the settings UI could never produce, and impossible versions', async () => {
+    const backup = (docs: Record<string, unknown>) => JSON.stringify({ app: APP.id, format: 1, docs });
+    // An unknown locale used to be saved and then broke every t() call on the next launch.
+    await expect(
+      store.restore(backup({ config: { version: 1, value: { preferences: { locale: 'xx' } } } })),
+    ).rejects.toThrow(InvalidBackupError);
+    await expect(
+      store.restore(backup({ data: { version: 1, value: { items: [{ id: 1, name: 'x' }] } } })),
+    ).rejects.toThrow(InvalidBackupError);
+    await expect(store.restore(backup({ data: { version: -1e15, value: {} } }))).rejects.toThrow(
+      InvalidBackupError,
+    );
+    expect(await platform.read('config')).toBeNull();
   });
 });
 

@@ -10,3 +10,9 @@ test-results/
 # updater signing keys: never commit them
 *.key
 *.key.pub
+# local credentials and code-signing certificates
+.env
+.env.*
+*.pem
+*.p12
+*.pfx

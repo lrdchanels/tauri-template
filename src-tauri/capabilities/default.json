@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Permissions of the main window. The app's own commands (src-tauri/src) need no entry here; plugin APIs called from TypeScript do.",
+  "description": "Permissions of the main window. The app's own commands (src-tauri/src) need no entry here; plugin APIs called from TypeScript do. openUrl only reaches github.com (the report-a-problem link): add the domains your app opens.",
   "windows": ["main"],
   "permissions": [
     "core:default",
@@ -10,10 +10,10 @@
     "core:window:allow-set-focus",
     "dialog:allow-ask",
     "dialog:allow-message",
-    { "identifier": "opener:allow-open-url", "allow": [{ "url": "https://*" }] },
+    { "identifier": "opener:allow-open-url", "allow": [{ "url": "https://github.com/*" }] },
     {
       "identifier": "opener:allow-open-path",
-      "allow": [{ "path": "$APPDATA" }, { "path": "$APPDATA/**" }, { "path": "$APPLOG" }, { "path": "$APPLOG/**" }]
+      "allow": [{ "path": "$APPDATA" }, { "path": "$APPLOG" }]
     },
     "log:default",
     "notification:default",

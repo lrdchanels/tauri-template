@@ -1,15 +1,29 @@
 //! App data in its own folder (`app_data_dir`): JSON documents written by the frontend, always
 //! atomically (temporary file + rename) so a crash mid-write never leaves a broken file.
-//! The frontend can only touch the documents named in ALLOWED.
+//! The frontend can only touch the documents named in ALLOWED. Writes are serialised (WriteLock)
+//! so two saves of the same document never race on its temporary file.
 
 use crate::error::{AppError, Result};
 use std::fs;
+use std::io::Write;
 use std::path::{Path, PathBuf};
-use tauri::{AppHandle, Manager};
+use std::sync::Mutex;
+use tauri::{AppHandle, Manager, State};
 
 /// The only documents the frontend may read or write. Keep in sync with STORE_KEYS in
-/// src/platform/types.ts (test/storage-keys.test.ts checks it).
+/// src/platform/types.ts (test/store.test.ts checks it).
 pub const ALLOWED: &[&str] = &["config", "data"];
+
+/// Held while writing or deleting documents.
+#[derive(Default)]
+pub struct WriteLock(Mutex<()>);
+
+impl WriteLock {
+    fn hold(&self) -> std::sync::MutexGuard<'_, ()> {
+        // A panic while holding the lock leaves no broken state (writes are atomic): keep going.
+        self.0.lock().unwrap_or_else(|e| e.into_inner())
+    }
+}
 
 fn folder(app: &AppHandle) -> Result<PathBuf> {
     let dir = app.path().app_data_dir()?;
@@ -25,10 +39,16 @@ pub fn path_for(dir: &Path, key: &str) -> Result<PathBuf> {
     Ok(dir.join(format!("{key}.json")))
 }
 
-/// Writes `contents` to `target` through a temporary file in the same folder.
+/// Writes `contents` to `target` through a temporary file in the same folder, flushed to disk
+/// before the rename so a power cut leaves either the old or the new file, never an empty one.
 pub fn write_atomic(target: &Path, contents: &str) -> Result<()> {
     let tmp = target.with_extension("json.tmp");
-    fs::write(&tmp, contents).map_err(|e| AppError::io("Cannot write", &tmp, e))?;
+    let write = || -> std::io::Result<()> {
+        let mut f = fs::File::create(&tmp)?;
+        f.write_all(contents.as_bytes())?;
+        f.sync_all()
+    };
+    write().map_err(|e| AppError::io("Cannot write", &tmp, e))?;
     fs::rename(&tmp, target).map_err(|e| AppError::io("Cannot save", target, e))
 }
 
@@ -52,18 +72,25 @@ pub fn clear(dir: &Path) -> Result<()> {
 }
 
 #[tauri::command]
-pub fn storage_read(app: AppHandle, key: String) -> Result<Option<String>> {
+pub async fn storage_read(app: AppHandle, key: String) -> Result<Option<String>> {
     read(&folder(&app)?, &key)
 }
 
 #[tauri::command]
-pub fn storage_write(app: AppHandle, key: String, contents: String) -> Result<()> {
+pub async fn storage_write(
+    app: AppHandle,
+    lock: State<'_, WriteLock>,
+    key: String,
+    contents: String,
+) -> Result<()> {
+    let _guard = lock.hold();
     write_atomic(&path_for(&folder(&app)?, &key)?, &contents)
 }
 
 /// Deletes every document (the UI asks for confirmation first).
 #[tauri::command]
-pub fn storage_clear(app: AppHandle) -> Result<()> {
+pub async fn storage_clear(app: AppHandle, lock: State<'_, WriteLock>) -> Result<()> {
+    let _guard = lock.hold();
     clear(&folder(&app)?)
 }
 

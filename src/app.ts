@@ -7,7 +7,7 @@ import { accelerator, installShortcuts, keysLabel, registerCommand, runCommand }
 import { setLocale, t } from './i18n';
 import { errorMessage } from './lib/errors';
 import { platform, type Update } from './platform';
-import { type Config, InvalidBackupError, NewerVersionError, store, type Theme } from './store';
+import { type Config, InvalidBackupError, NewerVersionError, store, THEMES } from './store';
 import { animateCharts, clearCharts } from './ui/charts';
 import { icon, installSegmentedKeys } from './ui/components';
 import { installCrashHandler } from './ui/crash';
@@ -27,7 +27,6 @@ const app = {
 };
 
 const PRIVATE_KEYS = 'mod+shift+h';
-const THEMES: Theme[] = ['system', 'light', 'dark'];
 
 /* ---------- shell ---------- */
 
@@ -360,18 +359,19 @@ function events() {
 export async function start(): Promise<void> {
   installCrashHandler();
   registerBuiltInCommands();
+  let loadError: unknown = null;
   try {
     await store.load();
   } catch (e) {
-    applyPreferences();
-    shell();
-    toast(t('error.loadData', { error: errorMessage(e) }), 'error');
+    loadError = e;
   }
   applyPreferences();
   shell();
   events();
   parseRoute(location.hash);
   paint();
+  // After shell(): it replaces the body, which would remove a toast shown earlier.
+  if (loadError) toast(t('error.loadData', { error: errorMessage(loadError) }), 'error');
   await buildMenu();
   await applyGlobalShortcut();
   if (platform.isApp && store.config.value.preferences.updates) setTimeout(() => void checkUpdate(), 4000);

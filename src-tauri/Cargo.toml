@@ -27,7 +27,8 @@ thiserror = "2"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "gzip"] }
 
 [profile.release]
-lto = "thin"
+lto = true
+panic = "abort"
 opt-level = 3
 strip = true
 codegen-units = 1
