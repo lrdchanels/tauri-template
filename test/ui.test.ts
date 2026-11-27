@@ -41,6 +41,8 @@ describe('i18n', () => {
     expect(resolveLocale('system', ['fr-FR', 'es-ES'])).toBe('es');
     expect(resolveLocale('system', ['de-DE'])).toBe('es');
     expect(resolveLocale('en', ['es-ES'])).toBe('en');
+    // A stored value with no dictionary falls back instead of breaking t().
+    expect(resolveLocale('xx' as 'en')).toBe('es');
   });
 
   it('joins lists in the current language', () => {

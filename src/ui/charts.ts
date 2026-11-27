@@ -189,7 +189,7 @@ export function axisTooltip(fmt: (v: number) => string): ChartOption {
         .filter(({ v }) => v !== null && v !== undefined)
         .map(
           ({ p, v }) =>
-            `<div class="tt-row"><i style="background:${p.color}"></i>${esc(p.seriesName)}<b>${esc(fmt(Number(v)))}</b></div>`,
+            `<div class="tt-row"><i style="background:${esc(p.color)}"></i>${esc(p.seriesName)}<b>${esc(fmt(Number(v)))}</b></div>`,
         );
       return `<div class="tt"><div class="tt-head">${esc(ps[0]?.axisValueLabel ?? '')}</div>${rows.join('')}</div>`;
     },

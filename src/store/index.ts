@@ -5,15 +5,18 @@
 // (src-tauri/src/storage.rs), create a Doc below and add it to DOCS.
 
 import { APP } from '../app.config';
-import type { LocalePreference } from '../i18n';
+import { LOCALES, type LocalePreference } from '../i18n';
 import type { Day } from '../lib/dates';
-import { Doc } from './doc';
+import { Doc, InvalidDocumentError } from './doc';
 
-export { NewerVersionError } from './doc';
+export { InvalidDocumentError, NewerVersionError } from './doc';
 
 /* ---------- config ---------- */
 
 export type Theme = 'system' | 'light' | 'dark';
+export const THEMES: readonly Theme[] = ['system', 'light', 'dark'];
+
+const isBool = (v: unknown): v is boolean => typeof v === 'boolean';
 
 export interface Config {
   preferences: {
@@ -34,6 +37,13 @@ export const config = new Doc<Config>({
   defaults: () => ({
     preferences: { theme: 'system', locale: 'system', private: false, updates: true, globalShortcut: false },
   }),
+  // Restored backups and hand-edited files must hold values the settings UI could produce.
+  validate: ({ preferences: p }) =>
+    THEMES.includes(p.theme) &&
+    (p.locale === 'system' || LOCALES.includes(p.locale)) &&
+    isBool(p.private) &&
+    isBool(p.updates) &&
+    isBool(p.globalShortcut),
 });
 
 /* ---------- data (replace with your app's model) ---------- */
@@ -53,6 +63,17 @@ export const data = new Doc<Data>({
   key: 'data',
   version: 1,
   defaults: () => ({ items: [] }),
+  validate: (d) =>
+    Array.isArray(d.items) &&
+    d.items.every(
+      (i) =>
+        typeof i === 'object' &&
+        i !== null &&
+        typeof i.id === 'string' &&
+        typeof i.name === 'string' &&
+        Number.isFinite(i.amount) &&
+        Number.isInteger(i.created),
+    ),
   // migrations: { 1: (old) => ({ ...old, items: old.items.map(...) }) },  // when version becomes 2
 });
 
@@ -100,7 +121,12 @@ export const store = {
     if (parsed?.app !== APP.id || typeof parsed.docs !== 'object' || parsed.docs === null)
       throw new InvalidBackupError();
     const docs = parsed.docs;
-    const values = DOCS.map((d) => d.hydrate(docs[d.key] ?? null));
+    let values: unknown[];
+    try {
+      values = DOCS.map((d) => d.hydrate(docs[d.key] ?? null));
+    } catch (e) {
+      throw e instanceof InvalidDocumentError ? new InvalidBackupError() : e;
+    }
     DOCS.forEach((d, i) => {
       (d as Doc<unknown>).value = values[i];
     });

@@ -5,12 +5,18 @@
 1. `npm run init-app` generates an updater key pair in `~/.tauri/<name>.key` and writes the public
    key into `src-tauri/tauri.conf.json` (`plugins.updater.pubkey`). Keep the private key out of git
    and backed up: if you lose it, installed apps cannot verify new versions.
-2. Add the private key to the repo secrets:
+2. Put the private key in a protected `release` environment (not in repository secrets: any
+   workflow run from any branch could read those):
 
    ```sh
-   gh secret set TAURI_SIGNING_PRIVATE_KEY < ~/.tauri/<name>.key
-   gh secret set TAURI_SIGNING_PRIVATE_KEY_PASSWORD --body ""   # or the password you chose
+   gh secret set TAURI_SIGNING_PRIVATE_KEY --env release < ~/.tauri/<name>.key
+   gh secret set TAURI_SIGNING_PRIVATE_KEY_PASSWORD --env release --body ""   # or your password
    ```
+
+   Then, in GitHub → Settings → Environments → `release`: add yourself as a required reviewer and
+   limit deployment refs to tags matching `v*`. In Settings → Rules → Rulesets, add a tag ruleset
+   for `v*` so only you can create release tags. Whoever can trigger a signed build can sign an
+   update that every installed copy will accept.
 
 3. Make sure `plugins.updater.endpoints` points to
    `https://github.com/<owner>/<repo>/releases/latest/download/latest.json`.

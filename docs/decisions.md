@@ -53,3 +53,18 @@ For agents this turns most mistakes into fast, local, explicit failures.
 
 `tauri-plugin-updater` reads `latest.json` from the latest GitHub release; `release.yml` builds and
 signs everything on a version tag and leaves a draft release to review. No server needed.
+
+## Raw bytes for picked files
+
+`pick_files` returns a `tauri::ipc::Response` (an `ArrayBuffer` in the webview) with every file
+packed as length-prefixed name + bytes (`pack()` in `files.rs`, `unpackFiles()` in `lib/pack.ts`).
+Returning `Vec<u8>` through serde would send a JSON array of numbers: about four times larger and
+slow to parse for files of a few megabytes.
+
+## Limits at the Rust boundary
+
+The HTTP allowlist is enforced on every redirect hop, not only on the first URL, and responses
+are capped (`MAX_RESPONSE_BYTES`); files picked by the user are capped too (`MAX_FILE_BYTES`).
+Storage writes take a lock and `fsync` before the rename, so concurrent saves of one document
+never race on its temporary file and a power cut leaves the old or the new version.
+

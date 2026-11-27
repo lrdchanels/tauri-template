@@ -28,7 +28,8 @@ export function resolveLocale(
   pref: LocalePreference,
   languages: readonly string[] = navigatorLanguages(),
 ): Locale {
-  if (pref !== 'system') return pref;
+  // An unknown value (hand-edited or old config) falls back instead of breaking every t() call.
+  if (pref !== 'system') return pref in DICTIONARIES ? pref : DEFAULT_LOCALE;
   for (const l of languages) {
     const base = l.toLowerCase().split('-')[0] ?? '';
     if (base in DICTIONARIES) return base as Locale;

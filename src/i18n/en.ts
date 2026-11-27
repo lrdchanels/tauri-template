@@ -49,6 +49,7 @@ export const en: Messages = {
     'The app hit an unexpected error. You can keep using it; if it happens again, copy the details and let us know.',
   'error.copy': 'Copy details',
   'error.copied': 'Details copied.',
+  'error.copyFailed': 'Could not copy the details.',
   'error.report': 'Report a problem',
   'error.dismiss': 'Close',
 

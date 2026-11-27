@@ -1,0 +1,40 @@
+name: Audit
+
+# Known vulnerabilities in dependencies (npm and Cargo). Runs when a lockfile changes and every
+# Monday, so an advisory published after a release still shows up.
+on:
+  push:
+    branches: [main]
+    paths: [package-lock.json, src-tauri/Cargo.lock, .github/workflows/audit.yml]
+  pull_request:
+    paths: [package-lock.json, src-tauri/Cargo.lock, .github/workflows/audit.yml]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+      # runtime dependencies only: dev tools never ship in the app
+      - run: npm audit --omit=dev --audit-level=high
+
+  cargo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: taiki-e/install-action@073e1fd0bc889c9aee68dbaaa927cde1b5653a83 # v2
+        with:
+          tool: cargo-audit
+      - run: cargo audit --file src-tauri/Cargo.lock

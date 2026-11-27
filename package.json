@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "description": "Desktop app template: Tauri 2 + TypeScript + Vite, no framework. Built to be extended by AI agents.",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

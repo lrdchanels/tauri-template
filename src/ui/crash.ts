@@ -34,8 +34,13 @@ export function showCrash(e: unknown): void {
   panel.addEventListener('click', async (ev) => {
     const action = (ev.target as Element).closest<HTMLElement>('[data-crash]')?.dataset.crash;
     if (action === 'copy') {
-      await navigator.clipboard.writeText(detail);
-      toast(t('error.copied'));
+      // A rejected copy must not raise another unhandled rejection (it would reopen this panel).
+      try {
+        await navigator.clipboard.writeText(detail);
+        toast(t('error.copied'));
+      } catch {
+        toast(t('error.copyFailed'), 'error');
+      }
     }
     if (action === 'report') await platform.openUrl(`https://github.com/${APP.repo}/issues/new`);
     if (action === 'close') panel.remove();
