@@ -69,5 +69,5 @@ jobs:
           releaseBody: Download the installer for your system below. On macOS, the first time, right-click the app → Open.
           releaseDraft: true
           prerelease: false
-          includeUpdaterJson: true
+          uploadUpdaterJson: true   # renamed from includeUpdaterJson in tauri-action v1
           args: --config src-tauri/tauri.updater.conf.json ${{ matrix.args }}
