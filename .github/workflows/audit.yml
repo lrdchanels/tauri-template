@@ -2,10 +2,8 @@ name: Audit
 
 # Known vulnerabilities in dependencies (npm and Cargo). Runs when a lockfile changes and every
 # Monday, so an advisory published after a release still shows up.
+# Pull requests that change dependencies, plus a weekly run for advisories published later.
 on:
-  push:
-    branches: [main]
-    paths: [package-lock.json, src-tauri/Cargo.lock, .github/workflows/audit.yml]
   pull_request:
     paths: [package-lock.json, src-tauri/Cargo.lock, .github/workflows/audit.yml]
   schedule:
