@@ -119,7 +119,7 @@ function paintView({ animate = true } = {}) {
   const scroll = main.scrollTop;
   clearCharts();
   animateCharts(animate);
-  root.replaceChildren();
+  root.replaceChildren(el(html`<h1 class="view-title">${t(view.title)}</h1>`));
   root.className = `view view-${view.id}`;
   measure(`paint ${view.id}`, () => view.render(root, context()));
   main.scrollTop = scroll;

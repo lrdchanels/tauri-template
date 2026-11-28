@@ -59,11 +59,41 @@ export const toggle = (name: string, label: string, checked: boolean, hint = '')
   <label class="toggle"><input type="checkbox" name="${name}" ${checked ? raw('checked') : ''}>
     <span>${label}${hint ? html`<small>${hint}</small>` : ''}</span></label>`;
 
+/* ---------- grouped rows ---------- */
+
+/**
+ * A settings-style group: rows inside one surface, separated by hairlines. `title` is an
+ * optional small heading above it. Compose with row() and switchRow().
+ */
+export const group = (rows: Raw[], title = ''): Raw => html`
+  ${title ? html`<h3 class="group-title">${title}</h3>` : ''}<div class="group">${rows}</div>`;
+
+/** One row of a group: what it is (and an optional explanation) on the left, controls on the right. */
+export const row = (
+  title: string,
+  text: Raw | string,
+  control: Raw | string = '',
+  danger = false,
+): Raw => html`
+  <div class="row${danger ? ' danger' : ''}">
+    <div class="row-text"><span>${title}</span>${text ? html`<small>${text}</small>` : ''}</div>
+    <div class="row-control">${control}</div>
+  </div>`;
+
+/** A row that is an on/off switch; the whole row is its label. Listen to `change` on `name`. */
+export const switchRow = (name: string, title: string, checked: boolean, text = ''): Raw => html`
+  <label class="row">
+    <span class="row-text"><span>${title}</span>${text ? html`<small>${text}</small>` : ''}</span>
+    <input class="switch" type="checkbox" role="switch" name="${name}" ${checked ? raw('checked') : ''}>
+  </label>`;
+
 /* ---------- segmented control ---------- */
 
 export interface Segment<V extends string = string> {
   value: V;
   text: string;
+  /** Accessible name when `text` alone is ambiguous out of context ('Dark' → 'Dark theme'). */
+  label?: string;
 }
 
 /**
@@ -74,7 +104,7 @@ export const segmented = <V extends string>(name: string, options: Segment<V>[],
   <div class="segmented" role="radiogroup" data-seg="${name}">
     ${options.map(
       (o) =>
-        html`<button type="button" role="radio" aria-checked="${String(o.value === current)}" tabindex="${o.value === current ? 0 : -1}" data-value="${o.value}">${o.text}</button>`,
+        html`<button type="button" role="radio" aria-checked="${String(o.value === current)}" tabindex="${o.value === current ? 0 : -1}" data-value="${o.value}" aria-label="${o.label ?? o.text}">${o.text}</button>`,
     )}
   </div>`;
 

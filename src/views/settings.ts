@@ -7,7 +7,7 @@ import { keysLabel } from '../commands';
 import { LOCALE_NAMES, LOCALES, type LocalePreference, t } from '../i18n';
 import { platform } from '../platform';
 import { store, type Theme } from '../store';
-import { field, fieldGroup, section, segmented, toggle } from '../ui/components';
+import { group, row, type Segment, section, segmented, switchRow } from '../ui/components';
 import { el, html, raw } from '../ui/html';
 import type { View, ViewContext } from './types';
 
@@ -41,33 +41,44 @@ export const settings: View = {
 
 function general(root: HTMLElement, ctx: ViewContext) {
   const p = store.config.value.preferences;
-  const themes: { value: Theme; text: string }[] = [
-    { value: 'system', text: t('theme.system') },
-    { value: 'light', text: t('theme.light') },
-    { value: 'dark', text: t('theme.dark') },
+  const themes: Segment<Theme>[] = [
+    { value: 'system', text: t('settings.theme.system'), label: t('theme.system') },
+    { value: 'light', text: t('settings.theme.light'), label: t('theme.light') },
+    { value: 'dark', text: t('settings.theme.dark'), label: t('theme.dark') },
   ];
   const locales: LocalePreference[] = ['system', ...LOCALES];
+  const shortcut = keysLabel('mod+shift+space', t('keys.shift'));
   root.innerHTML = String(html`
     ${section(t('settings.general'), t('settings.general.sub'))}
-    <div class="fields column">
-      ${fieldGroup(t('settings.theme'), segmented('theme', themes, p.theme))}
-      ${field(
+    ${group([
+      row(t('settings.theme'), '', segmented('theme', themes, p.theme)),
+      row(
         t('settings.language'),
-        html`<select name="locale">${locales.map(
+        '',
+        html`<select name="locale" aria-label="${t('settings.language')}">${locales.map(
           (l) =>
             html`<option value="${l}" ${l === p.locale ? raw('selected') : ''}>${l === 'system' ? t('locale.system') : LOCALE_NAMES[l]}</option>`,
         )}</select>`,
-      )}
-      ${platform.isApp ? toggle('updates', t('settings.updates'), p.updates) : ''}
-      ${platform.isApp ? toggle('globalShortcut', t('settings.shortcut', { shortcut: keysLabel('mod+shift+space', t('keys.shift')) }), p.globalShortcut, t('settings.shortcut.hint')) : ''}
-    </div>
-    <div class="cards">
-      <div class="card">
-        <h3>${t('settings.notify.title')}</h3>
-        <p>${t('settings.notify.text')}</p>
-        <div class="buttons"><button class="btn" data-action="notify.test">${t('settings.notify.test')}</button></div>
-      </div>
-    </div>`);
+      ),
+    ])}
+    ${
+      platform.isApp
+        ? group([
+            switchRow('updates', t('settings.updates'), p.updates),
+            switchRow(
+              'globalShortcut',
+              t('settings.shortcut', { shortcut }),
+              p.globalShortcut,
+              t('settings.shortcut.hint'),
+            ),
+            row(
+              t('settings.notify.title'),
+              t('settings.notify.text'),
+              html`<button class="btn" data-action="notify.test">${t('settings.notify.test')}</button>`,
+            ),
+          ])
+        : ''
+    }`);
 
   root.querySelector('[data-seg="theme"]')?.addEventListener('click', (ev) => {
     const b = (ev.target as Element).closest<HTMLElement>('[data-value]');
@@ -85,40 +96,42 @@ function general(root: HTMLElement, ctx: ViewContext) {
 function dataSection(root: HTMLElement) {
   root.innerHTML = String(html`
     ${section(t('settings.data'), t('settings.data.sub'))}
-    <div class="cards">
-      <div class="card">
-        <h3>${t('settings.data.backup.title')}</h3>
-        <p>${t('settings.data.backup.text')}</p>
-        <div class="buttons">
-          <button class="btn" data-action="backup.export">${t('settings.data.backup.export')}</button>
-          <button class="btn" data-action="backup.restore">${t('settings.data.backup.restore')}</button>
-        </div>
-      </div>
-      <div class="card">
-        <h3>${t('settings.data.folder.title')}</h3>
-        <p>${t('settings.data.folder.text')}</p>
-        <div class="buttons">
-          <button class="btn" data-action="folder.data">${t('settings.data.folder.open')}</button>
-          <button class="btn" data-action="folder.logs">${t('settings.data.logs.open')}</button>
-        </div>
-      </div>
-      <div class="card">
-        <h3>${t('settings.data.reset.title')}</h3>
-        <p>${t('settings.data.reset.text')}</p>
-        <div class="buttons"><button class="btn danger" data-action="data.reset">${t('reset.action')}</button></div>
-      </div>
-    </div>`);
+    ${group([
+      row(
+        t('settings.data.backup.title'),
+        t('settings.data.backup.text'),
+        html`<button class="btn" data-action="backup.export">${t('settings.data.backup.export')}</button>
+          <button class="btn" data-action="backup.restore">${t('settings.data.backup.restore')}</button>`,
+      ),
+      row(
+        t('settings.data.folder.title'),
+        t('settings.data.folder.text'),
+        html`<button class="btn" data-action="folder.data">${t('settings.data.folder.open')}</button>
+          <button class="btn" data-action="folder.logs">${t('settings.data.logs.open')}</button>`,
+      ),
+    ])}
+    ${group([
+      row(
+        t('settings.data.reset.title'),
+        t('settings.data.reset.text'),
+        html`<button class="btn danger" data-action="data.reset">${t('reset.action')}</button>`,
+        true,
+      ),
+    ])}`);
 }
 
 function about(root: HTMLElement) {
   root.innerHTML = String(html`
-    ${section(APP.name)}
-    <p class="version" data-testid="version">…</p>
-    ${platform.isApp ? '' : html`<p class="note">${t('settings.about.browser')}</p>`}
-    <div class="buttons spaced">
-      ${platform.isApp ? html`<button class="btn" data-action="updates.check">${t('settings.about.check')}</button>` : ''}
-      ${APP.repo ? html`<button class="btn" data-action="help.report">${t('error.report')}</button>` : ''}
-    </div>`);
+    ${section(t('settings.about'))}
+    ${group([
+      row(
+        APP.name,
+        html`<span class="version selectable" data-testid="version">…</span>`,
+        html`${platform.isApp ? html`<button class="btn" data-action="updates.check">${t('settings.about.check')}</button>` : ''}
+          ${APP.repo ? html`<button class="btn" data-action="help.report">${t('error.report')}</button>` : ''}`,
+      ),
+    ])}
+    ${platform.isApp ? '' : html`<p class="note">${t('settings.about.browser')}</p>`}`);
   void platform.version().then((v) => {
     const n = root.querySelector('.version');
     if (n) n.textContent = t('settings.about.version', { version: v });

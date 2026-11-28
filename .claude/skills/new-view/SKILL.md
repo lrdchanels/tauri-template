@@ -17,8 +17,9 @@ sidebar (`main`), the footer (`footer`) or nowhere (`hidden`).
    plain sentences, sentence case.
 4. If you need an icon that does not exist, add a 24×24 stroke path to `ICONS` in
    `src/ui/components.ts`.
-5. Styles: reuse classes from `src/styles/components.css` (`block`, `fields`, `field`, `cards`,
-   `card`, `btn`, `chart`…). New view-specific CSS goes at the end of that file under a comment
+5. Styles: reuse classes from `src/styles/components.css` (`block`, `lead`, `fields`, `field`,
+   `group`/`row` via `group()`/`row()`, `btn`, `chart`…). The shell paints the view title as an
+   `<h1>`; sections inside use `section()` (`<h2>`). New view-specific CSS goes at the end of that file under a comment
    with the view id, using only CSS variables from `tokens.css`.
 6. Add `e2e/<id>.spec.ts`: navigate to `/#<id>`, check the heading and the main interaction.
 7. Run `npm run check` and fix everything it reports.
