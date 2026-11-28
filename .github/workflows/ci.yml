@@ -1,9 +1,10 @@
 name: CI
 
+# Only on pull requests: main is protected, so everything reaches it through a PR that already
+# passed (the PR run tests the merge result). Run it by hand from Actions if needed.
 on:
-  push:
-    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 # a new push to the same branch cancels the previous run
 # read-only token: CI only builds and tests
