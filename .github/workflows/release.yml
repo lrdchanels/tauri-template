@@ -1,6 +1,6 @@
 name: Release
 
-# Pushing a v* tag (`npm run release -- 0.2.0`, then `git push --follow-tags`) builds the installers
+# Pushing a v* tag (`npm run release -- 0.2.0 --tag`, after its release PR is merged) builds the installers
 # for Windows, macOS (universal: Apple Silicon and Intel) and Linux, signs them for the updater and
 # creates a draft GitHub release with them and latest.json. Publish the draft to ship it.
 # Secrets (in the `release` environment): TAURI_SIGNING_PRIVATE_KEY (and TAURI_SIGNING_PRIVATE_KEY_PASSWORD).

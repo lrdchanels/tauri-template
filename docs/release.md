@@ -69,10 +69,20 @@ result in Settings → Rules → Rulesets and Settings → Environments.
 
 ## Each release
 
+`main` is protected (next to nothing reaches it without a pull request and green CI), so a
+release takes two steps:
+
 ```sh
-npm run release -- 0.2.0     # bumps versions, runs npm run check, commits "v0.2.0" and tags it
-git push --follow-tags       # release.yml builds Windows, macOS (universal) and Linux installers
+npm run release -- 0.2.0         # branch release/v0.2.0: bumps versions, runs npm run check,
+                                 # commits "v0.2.0", pushes it and opens a PR with auto-merge
+npm run release -- 0.2.0 --tag   # once the PR is merged: tags main as v0.2.0 and pushes the tag;
+                                 # release.yml builds Windows, macOS (universal) and Linux installers
 ```
+
+Auto-merge merges the PR by itself when the three CI jobs pass (`gh pr view release/v0.2.0` to
+follow it). Without `gh`, open and merge the PR by hand. `--dry-run` shows what either step would
+do. Only admins can push `v*` tags (the tag ruleset above), and the build waits for your approval
+of the `release` environment in Actions.
 
 The workflow creates a **draft** release with the installers and `latest.json`. Review it and
 publish it: from that moment installed apps see the update (Settings → About → Check for updates,

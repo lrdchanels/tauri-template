@@ -22,7 +22,7 @@ npm run format           # biome --write (format + organise imports + safe fixes
 npm test                 # unit tests; one: npx vitest run -t "backup"
 npm run e2e              # E2E in Chromium on :14290; debug: npx playwright test --ui
 npm run test:rs          # Rust tests; one: cargo test --manifest-path src-tauri/Cargo.toml <name>
-npm run release -- 0.2.0 # bump versions, run check, commit + tag; then `git push --follow-tags`
+npm run release -- 0.2.0 # release PR with auto-merge; once merged: npm run release -- 0.2.0 --tag
 npm run init-app         # once, after creating a repo from the template
 ```
 
