@@ -81,7 +81,11 @@ function base(): ChartOption {
     useUTC: true,
     animation: animate,
     animationDuration: 350,
-    textStyle: { fontFamily: 'Geist Variable, system-ui, sans-serif', color: c.text2, fontSize: 12 },
+    textStyle: {
+      fontFamily: getComputedStyle(document.documentElement).getPropertyValue('--font').trim(),
+      color: c.text2,
+      fontSize: 12,
+    },
     tooltip: {
       backgroundColor: c.surface,
       borderColor: c.border,

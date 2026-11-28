@@ -25,7 +25,7 @@ export const home: View = {
     root.append(
       el(html`
         <section class="block">
-          ${section(t('home.title'), t('home.lead'))}
+          <p class="lead">${t('home.lead')}</p>
           <form class="fields" data-testid="add-item">
             ${field(t('home.form.name'), html`<input name="name" required autocomplete="off">`)}
             ${field(t('home.form.amount'), html`<input name="amount" type="number" step="0.01" required>`)}

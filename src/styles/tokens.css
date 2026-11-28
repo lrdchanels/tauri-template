@@ -1,73 +1,84 @@
 /* Design tokens. Change the palette here: every component and chart reads these variables.
-   Themes: data-theme on <html> is 'system' (follows the OS), 'light' or 'dark'. */
+   Themes: data-theme on <html> is 'system' (follows the OS), 'light' or 'dark'.
+   The look is a quiet native window: one background for sidebar and content, structure from
+   hairlines and space, a single accent colour. --up / --down / --warn are for data only. */
 
 :root {
-  --font: "Geist Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --radius: 8px;
-
-  --sidebar: #13202f;
-  --sidebar-text: #b9c5d4;
-  --sidebar-active: #22344a;
-  --sidebar-accent: #8fb4f0;
+  --font:
+    system-ui, "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, Ubuntu, Cantarell,
+    "Noto Sans", sans-serif;
+  --radius: 6px;
+  --radius-group: 10px;
 
   color-scheme: light;
-  --bg: #f5f7fa;
+  --bg: #f7f7f6;
   --surface: #ffffff;
-  --surface-2: #eef2f6;
-  --border: #dde3eb;
-  --text: #14202e;
-  --text-2: #4b586a;
-  --text-3: #657184;
-  --grid: #e2e7ee;
-  --accent: #2563c9;
-  --accent-soft: #a9c3ec;
-  --neutral: #8a94a3;
-  --up: #18885a;
-  --down: #c4453b;
-  --warn: #9a6a12;
-  --warn-bg: #fbf3e2;
+  --surface-2: #efefed;
+  --line: #e4e4e1;
+  --border: #d9d9d5;
+  --fill: rgb(0 0 0 / 0.05);
+  --fill-strong: rgb(0 0 0 / 0.08);
+  --text: #1f2124;
+  --text-2: #5c6068;
+  --text-3: #6b7079;
+  --grid: #ebebe8;
+  --accent: #2f5fd0;
+  --accent-soft: #a8bdee;
+  --on-accent: #ffffff;
+  --neutral: #8b9098;
+  --up: #1a7f52;
+  --down: #c2412f;
+  --warn: #8f6410;
+  --warn-bg: #fbf3e0;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px rgb(0 0 0 / 0.1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root[data-theme="system"] {
     color-scheme: dark;
-    --sidebar: #0a111b;
-    --sidebar-active: #1a293b;
-    --bg: #0f1722;
-    --surface: #152131;
-    --surface-2: #1a2839;
-    --border: #26374c;
-    --text: #e5eaf1;
-    --text-2: #a8b4c3;
-    --text-3: #8693a5;
-    --grid: #223146;
-    --accent: #5b90e3;
-    --accent-soft: #35598f;
-    --neutral: #7f8b9c;
-    --up: #3db27b;
-    --down: #e4675d;
+    --bg: #1e1f22;
+    --surface: #26272b;
+    --surface-2: #2e2f34;
+    --line: #34353a;
+    --border: #3f4046;
+    --fill: rgb(255 255 255 / 0.06);
+    --fill-strong: rgb(255 255 255 / 0.1);
+    --text: #ececee;
+    --text-2: #a9adb5;
+    --text-3: #8d929b;
+    --grid: #303136;
+    --accent: #6b93ef;
+    --accent-soft: #34497a;
+    --on-accent: #0f1626;
+    --neutral: #7d828b;
+    --up: #45b783;
+    --down: #ec6b5a;
     --warn: #e0b25a;
-    --warn-bg: #2a2414;
+    --warn-bg: #2c2615;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 28px rgb(0 0 0 / 0.45);
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --sidebar: #0a111b;
-  --sidebar-active: #1a293b;
-  --bg: #0f1722;
-  --surface: #152131;
-  --surface-2: #1a2839;
-  --border: #26374c;
-  --text: #e5eaf1;
-  --text-2: #a8b4c3;
-  --text-3: #8693a5;
-  --grid: #223146;
-  --accent: #5b90e3;
-  --accent-soft: #35598f;
-  --neutral: #7f8b9c;
-  --up: #3db27b;
-  --down: #e4675d;
+  --bg: #1e1f22;
+  --surface: #26272b;
+  --surface-2: #2e2f34;
+  --line: #34353a;
+  --border: #3f4046;
+  --fill: rgb(255 255 255 / 0.06);
+  --fill-strong: rgb(255 255 255 / 0.1);
+  --text: #ececee;
+  --text-2: #a9adb5;
+  --text-3: #8d929b;
+  --grid: #303136;
+  --accent: #6b93ef;
+  --accent-soft: #34497a;
+  --on-accent: #0f1626;
+  --neutral: #7d828b;
+  --up: #45b783;
+  --down: #ec6b5a;
   --warn: #e0b25a;
-  --warn-bg: #2a2414;
+  --warn-bg: #2c2615;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 28px rgb(0 0 0 / 0.45);
 }

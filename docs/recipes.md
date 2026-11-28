@@ -8,7 +8,6 @@ Step-by-step changes, each ending with `npm run check`. File paths are relative 
 
    ```ts
    import { t } from '../i18n';
-   import { section } from '../ui/components';
    import { el, html } from '../ui/html';
    import type { View } from './types';
 
@@ -18,7 +17,8 @@ Step-by-step changes, each ending with `npm run check`. File paths are relative 
      icon: 'chart',
      nav: 'main',
      render(root, ctx) {
-       root.append(el(html`<section class="block">${section(t('reports.title'), t('reports.lead'))}</section>`));
+       // The shell already painted the view title (an <h1> with t(title)) at the top of root.
+       root.append(el(html`<section class="block"><p class="lead">${t('reports.lead')}</p></section>`));
      },
    };
    ```
@@ -75,7 +75,8 @@ Test the migration in `test/store.test.ts`.
 
 1. Add the field with its default to `Config['preferences']` (or a new group) in
    `src/store/index.ts`. Existing users get the default automatically.
-2. Show it in `src/views/settings.ts` (`toggle`, `field`, `segmented`) and save it with
+2. Show it in `src/views/settings.ts` as a row of a `group()` (`switchRow` for on/off,
+   `row(title, text, control)` with a `segmented` or `<select>` otherwise) and save it with
    `ctx.setPreference('key', value)`; extend `setPreference` in `app.ts` if it must be applied
    (like the theme or the global shortcut).
 3. Add a section: append to `SECTIONS` in `settings.ts`.
@@ -129,8 +130,9 @@ Need another chart type (pie, scatter, treemap…)? Import it in `src/ui/charts.
 
 ## Change the look
 
-Palette and radius in `src/styles/tokens.css` (light and both dark blocks). Font: replace
-`@fontsource-variable/geist` in `src/main.ts` and `--font`. App icon: put a square SVG somewhere
+Palette and radius in `src/styles/tokens.css` (light and both dark blocks). The font is the
+system's (`--font`); for a custom one, install a `@fontsource-variable/*` package, import it in
+`src/main.ts` and put its name first in `--font`. App icon: put a square SVG somewhere
 and run `npm run init-app -- --icon path/to/icon.svg --no-key --yes` or `npm run icons`.
 
 ## Import files
